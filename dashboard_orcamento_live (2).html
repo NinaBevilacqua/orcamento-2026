@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orçamento 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://alcdn.msauth.net/browser/2.38.2/js/msal-browser.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+
+:root {
+  --bg:      #F4F4F2;
+  --surface: #FFFFFF;
+  --border:  #E8E8E5;
+  --ink:     #18181A;
+  --ink2:    #737373;
+  --ink3:    #B0B0AA;
+  --a1: #E05C3A;
+  --a2: #3A7D5C;
+  --a3: #2B5BA8;
+  --a4: #7A4FA0;
+  --a5: #C4882A;
+  --ok:     #3A7D5C;
+  --warn:   #C4882A;
+  --danger: #E05C3A;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  min-height: 100vh;
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── LOGIN SCREEN ── */
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+.login-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 48px;
+  width: 380px;
+  text-align: center;
+  box-shadow: 0 4px 40px rgba(0,0,0,0.06);
+}
+
+.login-logo {
+  width: 48px; height: 48px;
+  background: var(--ink);
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.login-logo svg { width: 24px; height: 24px; fill: #fff; }
+
+.login-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+  margin-bottom: 6px;
+}
+
+.login-sub {
+  font-size: 12px;
+  color: var(--ink3);
+  margin-bottom: 32px;
+  line-height: 1.5;
+}
+
+.btn-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 20px;
+  background: var(--ink);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.btn-login:hover { opacity: 0.85; }
+
+.btn-login svg { width: 18px; height: 18px; }
+
+/* ── LOADING ── */
+.loading-screen {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.spinner {
+  width: 32px; height: 32px;
+  border: 2px solid var(--border);
+  border-top-color: var(--ink);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.loading-text {
+  font-size: 13px;
+  color: var(--ink3);
+}
+
+/* ── ERROR ── */
+.error-box {
+  display: none;
+  background: #FEE2E2;
+  border: 1px solid #FECACA;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 16px;
+  font-size: 12px;
+  color: var(--danger);
+  text-align: left;
+}
+
+/* ── APP ── */
+.app { display: none; }
+
+.layout { display: flex; min-height: 100vh; }
+
+.sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 10;
+}
+
+.sidebar-brand {
+  padding: 28px 24px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.brand-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 4px;
+}
+
+.brand-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.3;
+}
+
+.sidebar-nav { padding: 12px; flex: 1; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--ink2);
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s;
+  margin-bottom: 2px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.nav-item:hover { background: var(--bg); color: var(--ink); }
+.nav-item.active { background: var(--ink); color: #fff; font-weight: 500; }
+.nav-icon { width: 15px; height: 15px; opacity: 0.6; flex-shrink: 0; }
+.nav-item.active .nav-icon { opacity: 1; }
+
+.sidebar-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-total-label {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 4px;
+}
+
+.sidebar-total-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.sidebar-sync {
+  font-size: 10px;
+  color: var(--ink3);
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sync-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  flex-shrink: 0;
+}
+
+.content { margin-left: 220px; flex: 1; min-width: 0; }
+
+.page-header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 20px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.page-title { font-size: 16px; font-weight: 600; color: var(--ink); }
+.page-sub { font-size: 12px; color: var(--ink3); margin-top: 2px; }
+
+.header-right { display: flex; align-items: center; gap: 10px; }
+
+.btn-refresh {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink2);
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: all 0.15s;
+}
+.btn-refresh:hover { border-color: var(--ink3); color: var(--ink); }
+.btn-refresh svg { width: 13px; height: 13px; }
+
+.page-date {
+  font-size: 11px;
+  color: var(--ink3);
+  background: var(--bg);
+  padding: 5px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+.main { padding: 28px 32px; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+.kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.kpi {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 18px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.kpi-label { font-size: 11px; font-weight: 500; letter-spacing: 0.5px; color: var(--ink3); margin-bottom: 10px; text-transform: uppercase; }
+.kpi-value { font-size: 22px; font-weight: 600; color: var(--ink); line-height: 1; margin-bottom: 4px; }
+.kpi-sub { font-size: 11px; color: var(--ink3); }
+.kpi-accent { position: absolute; bottom: 0; left: 0; right: 0; height: 2px; }
+
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 16px; }
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; }
+.card-title { font-size: 12px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; color: var(--ink3); }
+.card-action { font-size: 11px; color: var(--ink3); }
+
+.cc-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 20px; }
+
+.cc-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.cc-card:hover { border-color: var(--ink3); }
+.cc-card.selected { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.cc-card-stripe { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+.cc-card-num { font-size: 10px; color: var(--ink3); margin-bottom: 4px; }
+.cc-card-name { font-size: 11px; font-weight: 500; color: var(--ink); margin-bottom: 12px; line-height: 1.4; min-height: 30px; }
+.cc-card-val { font-size: 14px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+.cc-card-sub { font-size: 10px; color: var(--ink3); margin-bottom: 8px; }
+
+.progress { height: 3px; background: var(--bg); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+.progress-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
+.cc-card-pct { font-size: 10px; color: var(--ink3); }
+
+.cat-rows { display: flex; flex-direction: column; gap: 12px; }
+.cat-row-item {}
+.cat-row-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+.cat-row-name { font-size: 12px; color: var(--ink); }
+.cat-row-val { font-size: 11px; color: var(--ink2); }
+.cat-track { height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.cat-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
+
+.badge { display: inline-flex; align-items: center; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 3px; }
+.badge-ok { background: #DCFCE7; color: var(--ok); }
+.badge-warn { background: #FEF3C7; color: var(--warn); }
+.badge-over { background: #FEE2E2; color: var(--danger); }
+
+.data-table { width: 100%; border-collapse: collapse; }
+.data-table th { font-size: 10px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; color: var(--ink3); padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.data-table td { padding: 10px 12px; border-bottom: 1px solid var(--border); font-size: 12px; color: var(--ink); }
+.data-table td:first-child { font-size: 13px; }
+.data-table tr:last-child td { border-bottom: none; }
+.data-table tr:hover td { background: var(--bg); }
+.data-table .total-row td { font-weight: 600; background: var(--bg); }
+
+.pills { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+.pill { font-size: 11px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--ink2); cursor: pointer; transition: all 0.15s; font-family: 'Poppins', sans-serif; }
+.pill:hover { border-color: var(--ink3); color: var(--ink); }
+.pill.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.donut-wrap { display: flex; align-items: center; gap: 20px; }
+.donut-leg { flex: 1; display: flex; flex-direction: column; gap: 9px; }
+.leg-item { display: flex; align-items: center; gap: 8px; }
+.leg-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.leg-name { flex: 1; font-size: 11px; color: var(--ink); }
+.leg-val { font-size: 11px; color: var(--ink3); }
+
+canvas { display: block; }
+</style>
+</head>
+<body>
+
+<!-- ── LOGIN ── -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 24 24"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
+    </div>
+    <div class="login-title">Orçamento 2026</div>
+    <div class="login-sub">Entre com sua conta Microsoft para carregar os dados do Excel automaticamente.</div>
+    <button class="btn-login" onclick="doLogin()">
+      <svg viewBox="0 0 21 21" fill="none">
+        <rect x="1" y="1" width="9" height="9" fill="#F25022"/>
+        <rect x="11" y="1" width="9" height="9" fill="#7FBA00"/>
+        <rect x="1" y="11" width="9" height="9" fill="#00A4EF"/>
+        <rect x="11" y="11" width="9" height="9" fill="#FFB900"/>
+      </svg>
+      Entrar com conta Microsoft
+    </button>
+    <div class="error-box" id="errorBox"></div>
+  </div>
+</div>
+
+<!-- ── LOADING ── -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">Conectando ao Excel...</div>
+</div>
+
+<!-- ── APP ── -->
+<div class="app" id="app">
+<div class="layout">
+
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-label">E&D · 2026</div>
+      <div class="brand-title">Controle Orçamentário</div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="nav-item active" onclick="showSection('geral', this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2h5v5H2V2zm7 0h5v5H9V2zM2 9h5v5H2V9zm7 0h5v5H9V9z"/></svg>
+        Visão Geral
+      </button>
+      <button class="nav-item" onclick="showSection('cc', this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M1 2a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H2a1 1 0 01-1-1V2zm7-1h4a1 1 0 011 1v4a1 1 0 01-1 1H9a1 1 0 01-1-1V2a1 1 0 011-1zM1 9a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H2a1 1 0 01-1-1V9zm7 0h4a1 1 0 011 1v4a1 1 0 01-1 1H9a1 1 0 01-1-1V9z"/></svg>
+        Centros de Custo
+      </button>
+      <button class="nav-item" onclick="showSection('cat', this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M0 0h1v15h15v1H0V0zm10 3.5a.5.5 0 01.5-.5h4a.5.5 0 01.5.5v4a.5.5 0 01-1 0V4.9l-3.613 4.417a.5.5 0 01-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 01-.808-.588l4-5.5a.5.5 0 01.758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 01-.5-.5z"/></svg>
+        Categorias
+      </button>
+      <button class="nav-item" onclick="showSection('mensal', this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M14 1H2a1 1 0 00-1 1v12a1 1 0 001 1h12a1 1 0 001-1V2a1 1 0 00-1-1zM2 0a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V2a2 2 0 00-2-2H2zm6.5 4a.5.5 0 01.5.5v3.19l1.9 1.1a.5.5 0 01-.5.87l-2.15-1.25A.5.5 0 017 8.5V4.5a.5.5 0 01.5-.5H8.5z"/></svg>
+        Mensal
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-total-label">Total Orçado</div>
+      <div class="sidebar-total-value" id="sidebarTotal">—</div>
+      <div class="sidebar-sync">
+        <div class="sync-dot"></div>
+        <span id="syncLabel">Conectado ao Excel</span>
+      </div>
+    </div>
+  </aside>
+
+  <div class="content">
+    <div class="page-header">
+      <div>
+        <div class="page-title" id="pageTitle">Visão Geral</div>
+        <div class="page-sub" id="pageSub">Carregando...</div>
+      </div>
+      <div class="header-right">
+        <button class="btn-refresh" onclick="refreshData()">
+          <svg viewBox="0 0 16 16" fill="currentColor"><path d="M8 3a5 5 0 10.374 9.987.5.5 0 11-.748.665A6 6 0 118 2v1z"/><path d="M8 4.466V.534a.25.25 0 01.41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 018 4.466z"/></svg>
+          Atualizar dados
+        </button>
+        <div class="page-date" id="pageDate">—</div>
+      </div>
+    </div>
+
+    <div class="main">
+
+      <!-- VISÃO GERAL -->
+      <section class="section active" id="geral">
+        <div class="kpi-row" id="kpiRow"></div>
+        <div class="grid-1-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Por Centro de Custo</div></div>
+            <div class="donut-wrap">
+              <canvas id="donutCC" width="130" height="130" style="flex-shrink:0"></canvas>
+              <div class="donut-leg" id="donutLeg"></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Distribuição Mensal</div><div class="card-action">orçado</div></div>
+            <canvas id="barMensal" height="140"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Por Categoria — Consolidado</div></div>
+          <canvas id="hbarCat" height="90"></canvas>
+        </div>
+      </section>
+
+      <!-- CENTROS DE CUSTO -->
+      <section class="section" id="cc">
+        <div class="cc-row" id="ccCards"></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Orçado vs Realizado por CC</div></div>
+            <canvas id="barCC" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title" id="ccDetailLabel">Clique em um CC para ver categorias</div></div>
+            <div class="cat-rows" id="ccCatRows"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CATEGORIAS -->
+      <section class="section" id="cat">
+        <div class="pills" id="catPills"><button class="pill active" onclick="filterCat('all',this)">Todos</button></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Distribuição</div></div>
+            <canvas id="polarCat" height="280"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Detalhamento</div></div>
+            <div class="cat-rows" id="catRows"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MENSAL -->
+      <section class="section" id="mensal">
+        <div class="pills" id="mesPills"><button class="pill active" onclick="filterMes('all',this)">Todos os CCs</button></div>
+        <div class="grid-2" style="margin-bottom:16px">
+          <div class="card">
+            <div class="card-header"><div class="card-title">Curva Mensal</div></div>
+            <canvas id="lineMes" height="200"></canvas>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">Empilhado por CC</div></div>
+            <canvas id="stackMes" height="200"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">Tabela Detalhada</div></div>
+          <div style="overflow-x:auto"><table class="data-table" id="mesTable"></table></div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════════
+const CLIENT_ID  = '955937e8-fc5b-44ce-a0fc-e5e38f66091d';
+const TENANT     = 'trigogrupo';
+const FILE_ID    = '12CEB2CE-2ABD-4D12-9018-560F98BB28AB';
+const SHEET_ORC  = 'Orcamento';
+const SHEET_LANC = 'Lancamentos';
+
+const msalConfig = {
+  auth: {
+    clientId: CLIENT_ID,
+    authority: `https://login.microsoftonline.com/${TENANT}.onmicrosoft.com`,
+    redirectUri: 'https://trigogrupo.sharepoint.com/sites/Desenvolvimento/Shared%20Documents/Claude%20-%20Or%C3%A7amento/dashboard_orcamento_live%20(1).html',
+  },
+  cache: { cacheLocation: 'sessionStorage' }
+};
+
+const msalInstance = new msal.PublicClientApplication(msalConfig);
+const SCOPES = ['Files.Read', 'User.Read'];
+
+const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const MESES_FULL = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const CC_COLORS = ['#E05C3A','#3A7D5C','#2B5BA8','#7A4FA0','#C4882A'];
+
+let CC = [];
+let accessToken = '';
+
+// ══════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════
+async function doLogin() {
+  try {
+    showError('');
+    const result = await msalInstance.loginPopup({ scopes: SCOPES });
+    accessToken = result.accessToken;
+    showLoading('Carregando dados do Excel...');
+    await loadData();
+  } catch(e) {
+    showError('Erro ao fazer login: ' + (e.message || e));
+  }
+}
+
+async function getToken() {
+  const accounts = msalInstance.getAllAccounts();
+  if (!accounts.length) return null;
+  try {
+    const r = await msalInstance.acquireTokenSilent({ scopes: SCOPES, account: accounts[0] });
+    return r.accessToken;
+  } catch {
+    const r = await msalInstance.acquireTokenPopup({ scopes: SCOPES });
+    return r.accessToken;
+  }
+}
+
+async function refreshData() {
+  showLoading('Atualizando dados...');
+  document.getElementById('app').style.display = 'none';
+  try {
+    accessToken = await getToken();
+    await loadData();
+  } catch(e) {
+    showError('Erro ao atualizar: ' + e.message);
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+  }
+}
+
+// ══════════════════════════════════════════
+// DATA LOADING
+// ══════════════════════════════════════════
+async function graphGet(url) {
+  const r = await fetch('https://graph.microsoft.com/v1.0' + url, {
+    headers: { Authorization: 'Bearer ' + accessToken }
+  });
+  if (!r.ok) throw new Error(`Graph error ${r.status}: ${await r.text()}`);
+  return r.json();
+}
+
+async function loadData() {
+  try {
+    setLoadingText('Lendo aba Orçamento...');
+
+    // Read Orcamento sheet
+    const orcRange = await graphGet(
+      `/me/drive/items/${FILE_ID}/workbook/worksheets('${SHEET_ORC}')/usedRange`
+    );
+
+    setLoadingText('Lendo lançamentos...');
+
+    // Read Lancamentos sheet
+    const lancRange = await graphGet(
+      `/me/drive/items/${FILE_ID}/workbook/worksheets('${SHEET_LANC}')/usedRange`
+    );
+
+    setLoadingText('Processando dados...');
+
+    CC = parseData(orcRange.values, lancRange.values);
+
+    renderApp();
+
+  } catch(e) {
+    document.getElementById('loadingScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    showError('Erro ao carregar dados: ' + e.message);
+  }
+}
+
+function parseData(orcRows, lancRows) {
+  // orcRows: header at index 0
+  // Cols: CC Nº(0), CC NOME(1), CATEGORIA(2), HISTÓRICO(3), TOTAL ORÇADO(4), TOTAL REALIZADO(5), SALDO(6), Jan(7)...Dec(18)
+
+  const ccMap = {};
+
+  for (let i = 1; i < orcRows.length; i++) {
+    const row = orcRows[i];
+    const ccNum = row[0];
+    const ccNome = row[1];
+    const vbz = row[2];
+    const hist = row[3];
+    const totalOrc = parseFloat(row[4]) || 0;
+    const meses = row.slice(7, 19).map(v => parseFloat(v) || 0);
+
+    if (!ccNum || !ccNome || ccNum === 'CC Nº' || !vbz) continue;
+
+    const key = `${ccNum} - ${ccNome}`;
+    if (!ccMap[key]) {
+      ccMap[key] = { num: ccNum, nome: ccNome, short: String(ccNum), total: 0, realizado: 0, cats: {}, meses: Array(12).fill(0) };
+    }
+
+    ccMap[key].total += Math.abs(totalOrc);
+    meses.forEach((v, i) => { ccMap[key].meses[i] += Math.abs(v); });
+
+    if (vbz && vbz !== 'CATEGORIA') {
+      ccMap[key].cats[vbz] = (ccMap[key].cats[vbz] || 0) + Math.abs(totalOrc);
+    }
+  }
+
+  // Parse lancamentos — col B = CC (1), C = VBZ (2), F = Valor (5)
+  const lancData = {};
+  for (let i = 5; i < lancRows.length; i++) {
+    const row = lancRows[i];
+    if (!row[1] || !row[5]) continue;
+    const ccKey = row[1];
+    const val = parseFloat(row[5]) || 0;
+    if (val === 0) continue;
+    lancData[ccKey] = (lancData[ccKey] || 0) + Math.abs(val);
+  }
+
+  Object.entries(lancData).forEach(([key, val]) => {
+    if (ccMap[key]) ccMap[key].realizado = val;
+  });
+
+  return Object.values(ccMap).filter(cc => cc.total > 0);
+}
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+function renderApp() {
+  document.getElementById('loadingScreen').style.display = 'none';
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  const total = CC.reduce((s,c) => s+c.total, 0);
+  const totalReal = CC.reduce((s,c) => s+c.realizado, 0);
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('pt-BR', {day:'2-digit',month:'short',year:'numeric'});
+
+  document.getElementById('sidebarTotal').textContent = fmtK(total);
+  document.getElementById('syncLabel').textContent = 'Atualizado ' + now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('pageDate').textContent = dateStr;
+  document.getElementById('pageSub').textContent = `${CC.length} centros de custo · ${Object.keys(CC.reduce((a,c)=>{Object.keys(c.cats).forEach(k=>a[k]=1);return a},{})).length} categorias`;
+
+  buildGeral(total, totalReal);
+  buildCC(total, totalReal);
+  buildCat();
+  buildMensal();
+}
+
+// ── HELPERS ──
+const fmtR = v => 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:0});
+const fmtK = v => { const n=Math.abs(v); return n>=1e6?'R$'+(n/1e6).toFixed(1)+'M':n>=1e3?'R$'+(n/1e3).toFixed(0)+'k':'R$'+n; };
+
+const chartBase = { responsive:true, maintainAspectRatio:true, plugins:{ legend:{display:false} } };
+function ticksXY() {
+  return {
+    x:{ grid:{display:false}, ticks:{color:'#B0B0AA',font:{family:'Poppins',size:10}} },
+    y:{ grid:{color:'#E8E8E5'}, ticks:{color:'#B0B0AA',font:{family:'Poppins',size:10},callback:v=>fmtK(v)} }
+  };
+}
+
+// ── GERAL ──
+let donutChart=null, barMensalChart=null, hbarCatChart=null;
+
+function buildGeral(total, totalReal) {
+  const pctReal = total > 0 ? (totalReal/total*100).toFixed(1) : 0;
+  const saldo = total - totalReal;
+
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi">
+      <div class="kpi-label">Orçamento Total</div>
+      <div class="kpi-value">${fmtK(total)}</div>
+      <div class="kpi-sub">${CC.length} centros de custo</div>
+      <div class="kpi-accent" style="background:var(--a3)"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Realizado</div>
+      <div class="kpi-value" style="color:${totalReal>0?'var(--danger)':'var(--ink3)'}">${fmtK(totalReal)}</div>
+      <div class="kpi-sub">${pctReal}% do orçamento</div>
+      <div class="kpi-accent" style="background:var(--danger);width:${pctReal}%"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Saldo Disponível</div>
+      <div class="kpi-value" style="color:var(--ok)">${fmtK(saldo)}</div>
+      <div class="kpi-sub">${(100-pctReal).toFixed(1)}% disponível</div>
+      <div class="kpi-accent" style="background:var(--ok)"></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">Maior CC</div>
+      <div class="kpi-value">${fmtK(Math.max(...CC.map(c=>c.total)))}</div>
+      <div class="kpi-sub">${CC.sort((a,b)=>b.total-a.total)[0]?.num} · ${CC[0]?.short}</div>
+      <div class="kpi-accent" style="background:var(--a1)"></div>
+    </div>`;
+
+  if(donutChart) donutChart.destroy();
+  donutChart = new Chart(document.getElementById('donutCC').getContext('2d'), {
+    type:'doughnut',
+    data:{ labels:CC.map(c=>c.num), datasets:[{ data:CC.map(c=>c.total), backgroundColor:CC_COLORS, borderColor:'#fff', borderWidth:2, hoverOffset:4 }] },
+    options:{ responsive:false, cutout:'70%', plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` ${fmtR(ctx.raw)}`}} } }
+  });
+
+  const leg = document.getElementById('donutLeg');
+  leg.innerHTML = '';
+  CC.forEach((c,i) => {
+    leg.innerHTML += `<div class="leg-item">
+      <div class="leg-dot" style="background:${CC_COLORS[i]}"></div>
+      <div class="leg-name">${c.num} · ${c.nome.split(' ').slice(0,2).join(' ')}</div>
+      <div class="leg-val">${fmtK(c.total)}</div>
+    </div>`;
+  });
+
+  const totalMeses = MESES.map((_,i) => CC.reduce((s,c)=>s+c.meses[i],0));
+  if(barMensalChart) barMensalChart.destroy();
+  barMensalChart = new Chart(document.getElementById('barMensal').getContext('2d'), {
+    type:'bar',
+    data:{ labels:MESES, datasets:[{ data:totalMeses, backgroundColor:'#2B5BA822', borderColor:'#2B5BA8', borderWidth:1.5, borderRadius:4, borderSkipped:false }] },
+    options:{ ...chartBase, scales:ticksXY() }
+  });
+
+  const catTotals = {};
+  CC.forEach(c => Object.entries(c.cats).forEach(([k,v]) => { catTotals[k]=(catTotals[k]||0)+v; }));
+  const catSorted = Object.entries(catTotals).sort((a,b)=>b[1]-a[1]);
+  const catColors = ['#E05C3A','#2B5BA8','#3A7D5C','#7A4FA0','#C4882A','#5B8DB8','#8B5E3C','#4A7C59','#9B6B9B','#D4A853'];
+
+  if(hbarCatChart) hbarCatChart.destroy();
+  hbarCatChart = new Chart(document.getElementById('hbarCat').getContext('2d'), {
+    type:'bar',
+    data:{ labels:catSorted.map(([k])=>k), datasets:[{ data:catSorted.map(([,v])=>v), backgroundColor:catColors, borderRadius:4, borderSkipped:false }] },
+    options:{ ...chartBase, indexAxis:'y',
+      scales:{
+        x:{ grid:{color:'#E8E8E5'}, ticks:{color:'#B0B0AA',font:{family:'Poppins',size:10},callback:v=>fmtK(v)} },
+        y:{ grid:{display:false}, ticks:{color:'#737373',font:{family:'Poppins',size:11}} }
+      }
+    }
+  });
+}
+
+// ── CC ──
+let barCCChart = null;
+
+function buildCC() {
+  const grid = document.getElementById('ccCards');
+  grid.innerHTML = '';
+  CC.forEach((c,i) => {
+    const pct = c.total > 0 ? Math.min((c.realizado/c.total)*100, 100).toFixed(0) : 0;
+    grid.innerHTML += `<div class="cc-card" id="ccc${i}" onclick="selectCC(${i})">
+      <div class="cc-card-stripe" style="background:${CC_COLORS[i]}"></div>
+      <div class="cc-card-num">${c.num}</div>
+      <div class="cc-card-name">${c.nome}</div>
+      <div class="cc-card-val">${fmtK(c.total)}</div>
+      <div class="cc-card-sub">${fmtK(c.realizado)} realizado</div>
+      <div class="progress"><div class="progress-fill" style="width:${pct}%;background:${CC_COLORS[i]}"></div></div>
+      <div class="cc-card-pct">${pct}% utilizado</div>
+    </div>`;
+  });
+
+  if(barCCChart) barCCChart.destroy();
+  barCCChart = new Chart(document.getElementById('barCC').getContext('2d'), {
+    type:'bar',
+    data:{
+      labels:CC.map(c=>`${c.num}`),
+      datasets:[
+        { label:'Orçado', data:CC.map(c=>c.total), backgroundColor:CC_COLORS.map(c=>c+'33'), borderColor:CC_COLORS, borderWidth:1.5, borderRadius:4 },
+        { label:'Realizado', data:CC.map(c=>c.realizado), backgroundColor:CC_COLORS.map(c=>c+'99'), borderRadius:4 },
+      ]
+    },
+    options:{ ...chartBase,
+      plugins:{ legend:{ display:true, labels:{color:'#737373',font:{family:'Poppins',size:10},boxWidth:8,padding:12} } },
+      scales:ticksXY()
+    }
+  });
+
+  // Add CC pills to cat and mes sections
+  const catPills = document.getElementById('catPills');
+  const mesPills = document.getElementById('mesPills');
+  // Remove old cc pills
+  catPills.querySelectorAll('.cc-pill').forEach(b=>b.remove());
+  mesPills.querySelectorAll('.cc-pill').forEach(b=>b.remove());
+  CC.forEach((c,i) => {
+    catPills.innerHTML += `<button class="pill cc-pill" onclick="filterCat('${i}',this)">${c.num}</button>`;
+    mesPills.innerHTML += `<button class="pill cc-pill" onclick="filterMes('${i}',this)">${c.num}</button>`;
+  });
+}
+
+function selectCC(i) {
+  document.querySelectorAll('.cc-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById(`ccc${i}`).classList.add('selected');
+  const cc = CC[i];
+  document.getElementById('ccDetailLabel').textContent = `${cc.num} — Categorias`;
+  const el = document.getElementById('ccCatRows');
+  el.innerHTML = '';
+  const max = Math.max(...Object.values(cc.cats));
+  Object.entries(cc.cats).sort((a,b)=>b[1]-a[1]).forEach(([k,v]) => {
+    const w = (v/max*100).toFixed(0);
+    el.innerHTML += `<div class="cat-row-item">
+      <div class="cat-row-top">
+        <div class="cat-row-name">${k}</div>
+        <div class="cat-row-val">${fmtR(v)}</div>
+      </div>
+      <div class="cat-track"><div class="cat-fill" style="width:${w}%;background:${CC_COLORS[i]}"></div></div>
+    </div>`;
+  });
+}
+
+// ── CATEGORIAS ──
+let polarChart = null;
+
+function buildCat() { renderCat('all'); }
+
+function filterCat(f, btn) {
+  document.querySelectorAll('#catPills .pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderCat(f);
+}
+
+function renderCat(f) {
+  const src = f==='all' ? CC : [CC[+f]];
+  const cats = {};
+  src.forEach(c => Object.entries(c.cats).forEach(([k,v]) => { cats[k]=(cats[k]||0)+v; }));
+  const sorted = Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+  const max = sorted[0]?.[1]||1;
+  const total = sorted.reduce((s,[,v])=>s+v,0);
+  const colors = ['#E05C3A','#2B5BA8','#3A7D5C','#7A4FA0','#C4882A','#5B8DB8','#8B5E3C','#4A7C59','#9B6B9B','#D4A853'];
+
+  const el = document.getElementById('catRows');
+  el.innerHTML = '';
+  sorted.forEach(([k,v],i) => {
+    const w=(v/max*100).toFixed(0);
+    el.innerHTML += `<div class="cat-row-item">
+      <div class="cat-row-top">
+        <div class="cat-row-name">${k}</div>
+        <div class="cat-row-val">${fmtR(v)} · ${(v/total*100).toFixed(1)}%</div>
+      </div>
+      <div class="cat-track"><div class="cat-fill" style="width:${w}%;background:${colors[i%colors.length]}"></div></div>
+    </div>`;
+  });
+
+  if(polarChart) polarChart.destroy();
+  polarChart = new Chart(document.getElementById('polarCat').getContext('2d'), {
+    type:'polarArea',
+    data:{ labels:sorted.map(([k])=>k), datasets:[{ data:sorted.map(([,v])=>v), backgroundColor:colors.map(c=>c+'99'), borderColor:colors, borderWidth:1 }] },
+    options:{ responsive:true,
+      plugins:{ legend:{display:true,position:'bottom',labels:{color:'#737373',font:{family:'Poppins',size:9},padding:8,boxWidth:7}}, tooltip:{callbacks:{label:ctx=>` ${fmtR(ctx.raw)}`}} },
+      scales:{ r:{ ticks:{color:'#B0B0AA',font:{size:9},callback:v=>fmtK(v)}, grid:{color:'#E8E8E5'} } }
+    }
+  });
+}
+
+// ── MENSAL ──
+let lineChart=null, stackChart=null;
+
+function buildMensal() { renderMes('all'); }
+
+function filterMes(f, btn) {
+  document.querySelectorAll('#mesPills .pill').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderMes(f);
+}
+
+function renderMes(f) {
+  const src = f==='all' ? CC : [CC[+f]];
+  const mData = MESES.map((_,i) => src.reduce((s,c)=>s+c.meses[i],0));
+
+  if(lineChart) lineChart.destroy();
+  const ctx = document.getElementById('lineMes').getContext('2d');
+  const g = ctx.createLinearGradient(0,0,0,200);
+  g.addColorStop(0,'rgba(43,91,168,0.15)'); g.addColorStop(1,'rgba(43,91,168,0)');
+  lineChart = new Chart(ctx, {
+    type:'line',
+    data:{ labels:MESES, datasets:[{ data:mData, borderColor:'#2B5BA8', borderWidth:1.5, pointBackgroundColor:'#2B5BA8', pointRadius:3, fill:true, backgroundColor:g, tension:0.3 }] },
+    options:{ ...chartBase, scales:ticksXY() }
+  });
+
+  if(stackChart) stackChart.destroy();
+  stackChart = new Chart(document.getElementById('stackMes').getContext('2d'), {
+    type:'bar',
+    data:{ labels:MESES, datasets:src.map(c=>({ label:`${c.num}`, data:c.meses, backgroundColor:CC_COLORS[CC.indexOf(c)]+'99', borderRadius:2, stack:'s' })) },
+    options:{ ...chartBase,
+      plugins:{ legend:{display:true,labels:{color:'#737373',font:{family:'Poppins',size:10},boxWidth:8,padding:12}} },
+      scales:{ x:{grid:{display:false},ticks:{color:'#B0B0AA',font:{family:'Poppins',size:10}},stacked:true}, y:{grid:{color:'#E8E8E5'},ticks:{color:'#B0B0AA',font:{family:'Poppins',size:10},callback:v=>fmtK(v)},stacked:true} }
+    }
+  });
+
+  const tbl = document.getElementById('mesTable');
+  tbl.innerHTML = `<thead><tr><th>Mês</th>${src.map(c=>`<th>${c.num}</th>`).join('')}<th>Total</th></tr></thead>`;
+  let body = '<tbody>';
+  MESES_FULL.forEach((m,i) => {
+    const tot = src.reduce((s,c)=>s+c.meses[i],0);
+    body += `<tr><td>${m}</td>${src.map(c=>`<td>${fmtK(c.meses[i])}</td>`).join('')}<td>${fmtK(tot)}</td></tr>`;
+  });
+  const gtot = src.reduce((s,c)=>s+c.total,0);
+  body += `<tr class="total-row"><td>Total</td>${src.map(c=>`<td>${fmtK(c.total)}</td>`).join('')}<td>${fmtK(gtot)}</td></tr></tbody>`;
+  tbl.innerHTML += body;
+}
+
+// ── NAV ──
+const TITLES = { geral:'Visão Geral', cc:'Centros de Custo', cat:'Categorias', mensal:'Mensal' };
+function showSection(id, btn) {
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('pageTitle').textContent = TITLES[id];
+}
+
+// ── UI HELPERS ──
+function showLoading(msg) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('loadingScreen').style.display = 'flex';
+  document.getElementById('loadingText').textContent = msg;
+}
+function setLoadingText(msg) { document.getElementById('loadingText').textContent = msg; }
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.style.display = msg ? 'block' : 'none';
+  box.textContent = msg;
+}
+
+// ── INIT — handle redirect ──
+(async () => {
+  try {
+    const result = await msalInstance.handleRedirectPromise();
+    if (result) {
+      accessToken = result.accessToken;
+      showLoading('Carregando dados do Excel...');
+      await loadData();
+    } else {
+      const accounts = msalInstance.getAllAccounts();
+      if (accounts.length > 0) {
+        showLoading('Reconectando...');
+        accessToken = await getToken();
+        await loadData();
+      }
+      // else: show login screen (default state)
+    }
+  } catch(e) {
+    // show login screen
+  }
+})();
+</script>
+</body>
+</html>
